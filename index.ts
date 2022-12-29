@@ -1,13 +1,13 @@
 import { serve as denoServe } from "https://deno.land/std@v0.139.0/http/server.ts";
 
 const METHODS = ['get', 'post', 'put', 'delete', 'options'] as const
-type Method = typeof METHODS[number]
+export type Method = typeof METHODS[number]
 
-type Segment = `/${string}` | `:${string}` | '*'
-type PathPattern = [...Segment[], Segment | '**']
+export type Segment = `/${string}` | `:${string}` | '*'
+export type PathPattern = [...Segment[], Segment | '**']
 
-type HandlerFn = (req: Request, params: Record<string, string>) => Promise<Response> | Response
-type MiddlewareFn = (req: Request, params: Record<string, string>) => Promise<Request> | Request
+export type HandlerFn = (req: Request, params: Record<string, string>) => Promise<Response> | Response
+export type MiddlewareFn = (req: Request, params: Record<string, string>) => Promise<Request> | Request
 
 type Handler = {
     method: Method,
@@ -25,7 +25,7 @@ function matchParams(url: string, pathPattern: PathPattern): Record<string, stri
     const requestSegments = pathname.split('/').slice(1)
 
     const params: Record<string, string> = {}
-    
+
     for (let i = 0; i < requestSegments.length; i++) {
         const requestSegment = requestSegments[i]
         const pattern = pathPattern[i]
@@ -62,7 +62,7 @@ export function create(): App {
     const handlers: Handler[] = []
     const middlewares: Middleware[] = []
 
-    function createMethod (method: Method) {
+    function createMethod(method: Method) {
         return (pathPattern: PathPattern, fn: HandlerFn) => {
             handlers.push({
                 method: method,
@@ -70,7 +70,7 @@ export function create(): App {
                 fn
             })
         }
-    } 
+    }
 
     return {
         get: createMethod('get'),
