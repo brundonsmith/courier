@@ -7,7 +7,7 @@ export type Segment = `/${string}` | `:${string}` | '*'
 export type PathPattern = [...Segment[], Segment | '**']
 
 export type HandlerFn = (req: Request, params: Record<string, string>) => Promise<Response> | Response
-export type MiddlewareFn = (req: Request, params: Record<string, string>) => Promise<Request> | Request
+export type MiddlewareFn = (req: Request, params: Record<string, string>) => Promise<Request | Response> | Request | Response
 
 type Handler = {
     method: Method,
@@ -91,7 +91,13 @@ export function create(): App {
                 for (const middleware of middlewares) {
                     const params = matchParams(req.url, middleware.pathPattern)
                     if (params != null) {
-                        req = await middleware.fn(req, params)
+                        const middlewareRes = await middleware.fn(req, params)
+
+                        if (middlewareRes instanceof Request) {
+                            req = middlewareRes
+                        } else {
+                            return middlewareRes
+                        }
                     }
                 }
 
